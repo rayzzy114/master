@@ -242,12 +242,17 @@ questions = [
     },
 ]
 
+# Перемешиваем вопросы один раз
+random.shuffle(questions)
+
 # Функция для отображения теста
 def run_quiz():
-    random.shuffle(questions)  # Перемешиваем вопросы для случайного порядка
     st.title("Тест по экономическому анализу")
 
+    # Храним ответы пользователя
     user_answers = []
+
+    # Выводим вопросы
     for idx, q in enumerate(questions):
         st.subheader(f"Вопрос {idx + 1}")
         st.write(q["question"])
