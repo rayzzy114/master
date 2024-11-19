@@ -249,14 +249,14 @@ def run_test():
     total_questions = len(questions)
     answered_questions = []
 
-    # Перемешиваем вопросы
-    random.shuffle(questions)
+    # Перемешиваем вопросы один раз
+    shuffled_questions = random.sample(questions, len(questions))
 
     # Словарь для хранения ответов
     user_answers = {}
 
     # Отображаем все вопросы
-    for i, question in enumerate(questions):
+    for i, question in enumerate(shuffled_questions):
         st.write(question["question"])
         for option in question["options"]:
             st.write(option)
@@ -266,7 +266,7 @@ def run_test():
 
     # Кнопка для проверки ответов
     if st.button("Проверить ответы"):
-        for i, question in enumerate(questions):
+        for i, question in enumerate(shuffled_questions):
             if user_answers[i].strip() in question["answer"].split(","):
                 score += 1
                 answered_questions.append((question["question"], "Правильно"))
