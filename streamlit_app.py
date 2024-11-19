@@ -257,8 +257,8 @@ def run_test():
         for option in question["options"]:
             st.write(option)
 
-        # Ввод ответа
-        answer = st.text_input("Введите ваш ответ (а, б, в, г, д, е, ж):", max_chars=1)
+        # Ввод ответа с уникальным ключом
+        answer = st.text_input(f"Введите ваш ответ (а, б, в, г, д, е, ж) для вопроса {i + 1}:", max_chars=1, key=f"answer_{i}")
         start_time = time.time()
         
         while time.time() - start_time < 7:
