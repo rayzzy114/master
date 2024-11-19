@@ -1,6 +1,5 @@
 import streamlit as st
 import random
-import time
 
 # Список вопросов и ответов
 questions = [
@@ -243,42 +242,42 @@ questions = [
     },
 ]
 
-# Функция запуска теста
+# Функция для отображения теста
 def run_quiz():
-    random.shuffle(questions)
-    score = 0
-    results = []
-
+    random.shuffle(questions)  # Перемешиваем вопросы для случайного порядка
     st.title("Тест по экономическому анализу")
 
+    user_answers = []
     for idx, q in enumerate(questions):
         st.subheader(f"Вопрос {idx + 1}")
         st.write(q["question"])
 
+        # Отображение вариантов ответа
         options = q["options"]
-        for i, option in enumerate(options):
-            st.write(option)
+        user_answer = st.radio(
+            "Выберите один из вариантов ответа:", options, key=f"q{idx}"
+        )
+        user_answers.append((user_answer, q["answer"]))
 
-        start_time = time.time()
-        user_answer = st.text_input(f"Ваш ответ на Вопрос {idx + 1} (например, 'а'):", key=idx)
+        # Добавляем разделитель для удобства
+        st.write("---")
 
-        while True:
-            elapsed_time = time.time() - start_time
-            if elapsed_time > 7:
-                st.warning("Время истекло!")
-                break
-            time.sleep(0.1)
+    # Кнопка для проверки результатов
+    if st.button("Проверить результаты"):
+        score = 0
+        st.subheader("Результаты теста")
+        for idx, (user_answer, correct_answer) in enumerate(user_answers):
+            if user_answer.startswith(correct_answer):  # Сравниваем по начальной букве
+                score += 1
+                st.write(f"Вопрос {idx + 1}: ✅ Правильно!")
+            else:
+                st.write(
+                    f"Вопрос {idx + 1}: ❌ Неправильно! Правильный ответ: {correct_answer}"
+                )
 
-        if user_answer.lower() == q["answer"]:
-            score += 1
-            results.append(f"Вопрос {idx + 1}: Правильно!")
-        else:
-            results.append(f"Вопрос {idx + 1}: Неправильно! Правильный ответ: {q['answer']}")
-
-    st.subheader("Результаты")
-    st.write(f"Ваш счет: {score}/{len(questions)}")
-    for result in results:
-        st.write(result)
+        # Итоговый результат
+        st.write("---")
+        st.write(f"Ваш результат: {score} из {len(questions)}")
 
 if __name__ == "__main__":
     run_quiz()
