@@ -242,65 +242,39 @@ questions = [
     },
 ]
 
-# Перемешиваем вопросы один раз
-random.shuffle(questions)
+# Функция для отображения вопроса и вариантов ответа
+def display_question(question_data):
+    st.write(question_data["question"])
+    selected_option = st.radio("Выберите ответ:", question_data["options"])
+    return selected_option
 
-# Состояние для отслеживания прогресса
-if "remaining_questions" not in st.session_state:
-    st.session_state.remaining_questions = questions.copy()
-    st.session_state.score = 0
-    st.session_state.completed_questions = []
+# Функция для проверки ответа
+def check_answer(selected_option, answer):
+    return selected_option.startswith(answer)
 
-def show_question():
-    # Проверка, остались ли вопросы
-    if st.session_state.remaining_questions:
-        # Берем случайный вопрос из оставшихся
-        question = random.choice(st.session_state.remaining_questions)
-        st.session_state.current_question = question
-        st.session_state.remaining_questions.remove(question)
-    else:
-        st.session_state.current_question = None
-
-# Отображаем следующий вопрос, если еще не показали
-if "current_question" not in st.session_state:
-    show_question()
-
-# Если есть текущий вопрос
-if st.session_state.current_question:
-    question = st.session_state.current_question
-    st.subheader("Ответьте на вопрос:")
-    st.write(question["question"])
-
-    # Отображаем варианты
-    user_answer = st.radio(
-        "Выберите один из вариантов ответа:", question["options"], key="current_answer"
-    )
-
-    # Кнопка для подтверждения ответа
-    if st.button("Подтвердить ответ"):
-        correct_answer = question["answer"]
-        if user_answer.startswith(correct_answer):  # Проверяем правильность ответа
-            st.session_state.score += 1
-            st.success("Правильный ответ!")
+# Основная функция приложения
+def main():
+    st.title("Тест по экономическому анализу")
+    
+    # Перемешиваем вопросы
+    random.shuffle(questions)
+    
+    score = 0
+    results = []
+    
+    for question_data in questions:
+        selected_option = display_question(question_data)
+        if check_answer(selected_option, question_data["answer"]):
+            score += 1
+            results.append(f"Вопрос: {question_data['question']} | Ваш ответ: {selected_option} | Правильный ответ: {question_data['answer']} | Верно")
         else:
-            st.error(f"Неправильно! Правильный ответ: {correct_answer}")
+            results.append(f"Вопрос: {question_data['question']} | Ваш ответ: {selected_option} | Правильный ответ: {question_data['answer']} | Неверно")
+    
+    st.write("### Результаты теста")
+    st.write(f"Ваш счет: {score}/{len(questions)}")
+    
+    for result in results:
+        st.write(result)
 
-        # Сохраняем вопрос в список завершенных
-        st.session_state.completed_questions.append(
-            {"question": question["question"], "your_answer": user_answer, "correct_answer": correct_answer}
-        )
-        
-        # Загружаем следующий вопрос
-        show_question()
-        st.experimental_rerun()  # Перезагрузка для отображения следующего вопроса
-
-else:
-    # Выводим результаты после завершения всех вопросов
-    st.title("Тест завершен!")
-    st.write(f"Ваш результат: {st.session_state.score} из {len(questions)}")
-    st.write("Ответы на вопросы:")
-    for idx, q in enumerate(st.session_state.completed_questions, start=1):
-        st.write(f"Вопрос {idx}: {q['question']}")
-        st.write(f"Ваш ответ: {q['your_answer']}")
-        st.write(f"Правильный ответ: {q['correct_answer']}")
-        st.write("---")
+if __name__ == "__main__":
+    main()
