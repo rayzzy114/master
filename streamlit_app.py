@@ -1,5 +1,4 @@
 import streamlit as st
-import random
 
 # Список вопросов и ответов
 questions = [
@@ -242,39 +241,80 @@ questions = [
     },
 ]
 
-# Функция для отображения вопроса и вариантов ответа
-def display_question(question_data):
-    st.write(question_data["question"])
-    selected_option = st.radio("Выберите ответ:", question_data["options"])
-    return selected_option
 
-# Функция для проверки ответа
-def check_answer(selected_option, answer):
-    return selected_option.startswith(answer)
+import streamlit as st
 
-# Основная функция приложения
-def main():
-    st.title("Тест по экономическому анализу")
-    
-    # Перемешиваем вопросы
-    random.shuffle(questions)
-    
-    score = 0
-    results = []
-    
-    for question_data in questions:
-        selected_option = display_question(question_data)
-        if check_answer(selected_option, question_data["answer"]):
-            score += 1
-            results.append(f"Вопрос: {question_data['question']} | Ваш ответ: {selected_option} | Правильный ответ: {question_data['answer']} | Верно")
+# Список вопросов
+questions = [
+    {
+        "question": "Под методом экономического анализа понимается:",
+        "options": [
+            "а) совокупность приемов и способов изучения экономической действительности;",
+            "б) системное, комплексное изучение, измерение и обобщение влияния факторов на результаты деятельности предприятия;",
+            "в) все вышеперечисленное."
+        ],
+        "answer": ["б"]
+    },
+    {
+        "question": "Особенность метода экономического анализа заключается в:",
+        "options": [
+            "а) разработке и использовании системы показателей, всесторонне характеризующих хозяйственную деятельность;",
+            "б) раскрытии и изучении причин (факторов), вызвавших изменения тех или иных хозяйственных показателей;",
+            "в) измерении взаимосвязи и взаимозависимости между показателями;",
+            "г) все вышеперечисленное."
+        ],
+        "answer": ["г"]
+    },
+    {
+        "question": "Методика экономического анализа представляет собой:",
+        "options": [
+            "а) совокупность конкретных приемов, способов и средств, применяемых в заранее определенной последовательности для достижения поставленной цели;",
+            "б) план проведения анализа хозяйственной деятельности экономического субъекта;",
+            "в) процесс обработки, передачи и хранения экономической информации на предприятии;",
+            "г) все вышеперечисленное."
+        ],
+        "answer": ["а"]
+    },
+    # Добавьте остальные 27 вопросов...
+]
+
+# Заголовок теста
+st.title("Тест по экономическому анализу")
+
+# Состояние для подсчета баллов
+if "score" not in st.session_state:
+    st.session_state.score = 0
+    st.session_state.completed = False
+
+# Если тест еще не завершен
+if not st.session_state.completed:
+    st.write("Ответьте на вопросы:")
+
+    for i, question in enumerate(questions):
+        st.write(f"**Вопрос {i + 1}:** {question['question']}")
+
+        if len(question["answer"]) > 1:
+            user_answer = st.multiselect(
+                f"Выберите правильные варианты для вопроса {i + 1}:",
+                question["options"],
+                key=f"question_{i}"
+            )
         else:
-            results.append(f"Вопрос: {question_data['question']} | Ваш ответ: {selected_option} | Правильный ответ: {question_data['answer']} | Неверно")
-    
-    st.write("### Результаты теста")
-    st.write(f"Ваш счет: {score}/{len(questions)}")
-    
-    for result in results:
-        st.write(result)
+            user_answer = st.radio(
+                f"Выберите один вариант для вопроса {i + 1}:",
+                question["options"],
+                key=f"question_{i}"
+            )
 
-if __name__ == "__main__":
-    main()
+        # Проверяем правильность ответа, когда пользователь завершает тест
+        if st.button("Завершить тест", key="finish"):
+            correct = question["answer"]
+            if sorted(user_answer) == sorted(correct):
+                st.session_state.score += 1
+
+    # Показываем результаты
+    if st.button("Показать результат"):
+        st.session_state.completed = True
+        st.success(f"Вы набрали {st.session_state.score} из {len(questions)} баллов.")
+else:
+    st.success(f"Вы завершили тест с результатом {st.session_state.score} из {len(questions)} баллов.")
