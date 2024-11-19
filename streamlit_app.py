@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import time
 
 # Список вопросов и ответов
 questions = [
@@ -242,43 +243,42 @@ questions = [
     },
 ]
 
-# Функция для запуска теста
-def run_test():
-    st.title("Экономический анализ - Тест")
+# Функция запуска теста
+def run_quiz():
+    random.shuffle(questions)
     score = 0
-    total_questions = len(questions)
-    answered_questions = []
+    results = []
 
-    # Перемешиваем вопросы один раз
-    shuffled_questions = random.sample(questions, len(questions))
+    st.title("Тест по экономическому анализу")
 
-    # Словарь для хранения ответов
-    user_answers = {}
+    for idx, q in enumerate(questions):
+        st.subheader(f"Вопрос {idx + 1}")
+        st.write(q["question"])
 
-    # Отображаем все вопросы
-    for i, question in enumerate(shuffled_questions):
-        st.write(question["question"])
-        for option in question["options"]:
+        options = q["options"]
+        for i, option in enumerate(options):
             st.write(option)
 
-        # Ввод ответа с уникальным ключом
-        user_answers[i] = st.text_input(f"Введите ваш ответ (а, б, в, г, д, е, ж) для вопроса {i + 1}:", max_chars=10, key=f"answer_{i}")
+        start_time = time.time()
+        user_answer = st.text_input(f"Ваш ответ на Вопрос {idx + 1} (например, 'а'):", key=idx)
 
-    # Кнопка для проверки ответов
-    if st.button("Проверить ответы"):
-        for i, question in enumerate(shuffled_questions):
-            if user_answers[i].strip() in question["answer"].split(","):
-                score += 1
-                answered_questions.append((question["question"], "Правильно"))
-            else:
-                answered_questions.append((question["question"], "Неправильно"))
+        while True:
+            elapsed_time = time.time() - start_time
+            if elapsed_time > 7:
+                st.warning("Время истекло!")
+                break
+            time.sleep(0.1)
 
-        # Результаты
-        st.write(f"Ваш результат: {score} из {total_questions} баллов.")
-        st.write("Список вопросов и ваши ответы:")
-        for q, result in answered_questions:
-            st.write(f"{q} - {result}")
+        if user_answer.lower() == q["answer"]:
+            score += 1
+            results.append(f"Вопрос {idx + 1}: Правильно!")
+        else:
+            results.append(f"Вопрос {idx + 1}: Неправильно! Правильный ответ: {q['answer']}")
 
-# Запуск теста
+    st.subheader("Результаты")
+    st.write(f"Ваш счет: {score}/{len(questions)}")
+    for result in results:
+        st.write(result)
+
 if __name__ == "__main__":
-    run_test()
+    run_quiz()
